@@ -78,7 +78,7 @@ public class PaymentParserService {
 				System.out.println(workbenchData);
 
 				//send to workbench
-			//	httpClientService.sendJsonToWorkbench(workbenchData);
+				httpClientService.sendJsonToWorkbench(workbenchData);
 			}
 		} catch (JSONException e) {
 			logger.error("Error parsing the list data to workbench json format data "+e.getMessage());
