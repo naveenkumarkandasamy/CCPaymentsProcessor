@@ -1,23 +1,12 @@
 package com.uganda.pru.payments.model;
 
-import java.util.Iterator;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.poiji.annotation.ExcelCellName;
 
-public class CashPayment {
+public class Barclays {
 
 	//@JsonPropertyOrder({ "Transaction Date", "Value Date", "Description", "Cheque Number", "Credit Amount", "Debit Amount", "Running Balance"})
-
-
+	private String bank;
+	private String transactionType;
 	@ExcelCellName("Transaction Date")
 	private String transactionDate;
 	@ExcelCellName("Value Date")
@@ -34,6 +23,18 @@ public class CashPayment {
 	private String runningBalance;
 
 
+	public String getBank() {
+		return bank;
+	}
+	public void setBank(String bank) {
+		this.bank = bank;
+	}
+	public String getTransactionType() {
+		return transactionType;
+	}
+	public void setTransactionType(String transactionType) {
+		this.transactionType = transactionType;
+	}
 	public String getTransactionDate() {
 		return transactionDate;
 	}

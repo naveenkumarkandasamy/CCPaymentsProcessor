@@ -1,6 +1,7 @@
 package com.uganda.pru.payments.config;
-import com.poiji.annotation.*;
 import java.lang.annotation.Annotation;
+
+import com.poiji.annotation.ExcelCellName;
 
 public class DynamicBeanClass implements ExcelCellName{
 
