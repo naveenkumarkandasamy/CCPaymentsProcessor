@@ -23,20 +23,20 @@ public class HttpClientService {
 
 	static final Logger logger = Logger.getLogger(HttpClientService.class);
 
-	@Value("{url}")
-	private String workbenchUrl;
 
-	@Value("{username}")
-	private String username;
+	@Value("${url}")
+	private String url;
 
-	@Value("{password}")
-	private String password;
+	@Value("${workbenchUsername}")
+	private String workbenchUsername;
+
+	@Value("${workbenchPassword}")
+	private String workbenchPassword;
 
 	public void sendJsonToWorkbench(String jsonWorkbenchData) {
 
 		CloseableHttpClient client = HttpClients.createDefault();
-
-		HttpPost httpPost = new HttpPost("http://10.4.14.245:8080/workbench-app/api/runtime/process-instances");
+		HttpPost httpPost = new HttpPost(url);
 
 		StringEntity entity;
 		try {
@@ -45,7 +45,7 @@ public class HttpClientService {
 			httpPost.setEntity(entity);
 			httpPost.setHeader("Content-type", "application/json");
 
-			UsernamePasswordCredentials creds = new UsernamePasswordCredentials("admin", "test");
+			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(workbenchUsername,workbenchPassword);
 
 			httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
 			CloseableHttpResponse response = client.execute(httpPost);

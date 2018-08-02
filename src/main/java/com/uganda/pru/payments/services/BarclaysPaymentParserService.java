@@ -1,8 +1,6 @@
 package com.uganda.pru.payments.services;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,13 +31,12 @@ public class BarclaysPaymentParserService extends PaymentParserService {
 	XLSXtoObjectConvertor xlsxToObjectConvertor;
 
 	static final Logger logger = Logger.getLogger(BarclaysPaymentParserService.class);
-	
-	final private String PRODUCT_DESCRIPTION = "PRU\t*/?\t*EDU.*"; 
 
+	final private String PRODUCT_DESCRIPTION = "PRU\t*/?\t*EDU.*";
 
 	public void parseExcelForBarclaysPayments(HttpServletResponse response, MultipartFile pasFile) throws Exception {
-		List<Barclays> barclaysPaymentsList = xlsxToObjectConvertor.xlsxToJavaObject(convert(pasFile),
-				Barclays.class);
+		File barclaysFile = convert(pasFile);
+		List<Barclays> barclaysPaymentsList = xlsxToObjectConvertor.xlsxToJavaObject(barclaysFile, Barclays.class);
 		splitBarclaysPaymentList(response, barclaysPaymentsList);
 	}
 
@@ -50,7 +47,7 @@ public class BarclaysPaymentParserService extends PaymentParserService {
 		barclaysList.stream().forEach(barclayPayment -> {
 			String description = "";
 			description = barclayPayment.getDescription();
-			if (null!=description && description.matches(PRODUCT_DESCRIPTION)) {
+			if (null != description && description.matches(PRODUCT_DESCRIPTION)) {
 				ilList.add(barclayPayment);
 			} else {
 				barclayPayment.setBank("Barclays");
@@ -64,16 +61,4 @@ public class BarclaysPaymentParserService extends PaymentParserService {
 		sendToWorkbench(workbenchList);
 	}
 
-	private File convert(MultipartFile file) throws IOException {
-		File convFile = new File(file.getOriginalFilename());
-		Boolean isFileNotCreated = convFile.createNewFile();
-		if (isFileNotCreated) {
-			logger.error("Unable to convert from mulitpart to file");
-			return null;
-		}
-		FileOutputStream fos = new FileOutputStream(convFile);
-		fos.write(file.getBytes());
-		fos.close();
-		return convFile;
-	}
 }

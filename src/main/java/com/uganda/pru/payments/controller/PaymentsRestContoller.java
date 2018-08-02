@@ -1,4 +1,5 @@
 package com.uganda.pru.payments.controller;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,7 +16,6 @@ import com.uganda.pru.payments.services.BarclaysPaymentParserService;
 import com.uganda.pru.payments.services.CentenaryBankParserService;
 import com.uganda.pru.payments.services.MobileMoneyParserService;
 
-
 @RestController
 @RequestMapping("/api/converter")
 public class PaymentsRestContoller {
@@ -26,11 +26,9 @@ public class PaymentsRestContoller {
 	MobileMoneyParserService mobileMoneyParserService;
 	@Autowired
 	CentenaryBankParserService centenaryBankParserService;
-	
-	
-	
+
 	static final Logger logger = Logger.getLogger(PaymentsRestContoller.class);
-	
+
 	@RequestMapping(value = "/barclays", method = RequestMethod.POST)
 	@ResponseBody
 	public void generateILFileForCashPayments(HttpServletRequest request, HttpServletResponse response,
@@ -42,8 +40,7 @@ public class PaymentsRestContoller {
 			logger.error("Error while parsing bank payments file for cash payments " + e);
 		}
 	}
-	
-	
+
 	@RequestMapping(value = "/mobileMoney", method = RequestMethod.POST)
 	@ResponseBody
 	public void generateILFileForMobileMoney(HttpServletRequest request, HttpServletResponse response,
@@ -55,6 +52,7 @@ public class PaymentsRestContoller {
 			logger.error("Error while parsing payments file for mobile money " + e);
 		}
 	}
+
 	@RequestMapping(value = "/centenaryUGX", method = RequestMethod.POST)
 	@ResponseBody
 	public void generateILFileForCentenaryBank(HttpServletRequest request, HttpServletResponse response,

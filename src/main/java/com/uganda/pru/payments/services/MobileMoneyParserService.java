@@ -1,8 +1,6 @@
 package com.uganda.pru.payments.services;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +22,7 @@ public class MobileMoneyParserService extends PaymentParserService {
 
 	static final Logger logger = Logger.getLogger(MobileMoneyParserService.class);
 
-	final private String PRODUCT_DESCRIPTION = "PRU\t*/?\t*EDU.*"; 
+	final private String PRODUCT_DESCRIPTION = "PRU\t*/?\t*EDU.*";
 
 	@Resource(name = "MobileMoneyToWorkbench")
 	private Map<String, String> MobileMoneyToWorkbench;
@@ -32,9 +30,9 @@ public class MobileMoneyParserService extends PaymentParserService {
 	@Autowired
 	Mapper workbenchMapper;
 
-	
 	public void parseExcelForMobileMoney(HttpServletResponse response, MultipartFile pasFile) throws Exception {
-		List<MobileMoney> mobileMoneyList = xlsxToObjectConvertor.xlsxToJavaObject(convert(pasFile), MobileMoney.class);
+		File mobileMoneyFile = convert(pasFile);
+		List<MobileMoney> mobileMoneyList = xlsxToObjectConvertor.xlsxToJavaObject(mobileMoneyFile, MobileMoney.class);
 		splitMobileMoneyList(response, mobileMoneyList);
 	}
 
@@ -44,7 +42,7 @@ public class MobileMoneyParserService extends PaymentParserService {
 		List<Workbench> workbenchList = new ArrayList<>();
 		mobileMoneyList.stream().forEach(mobilePayment -> {
 			String reference = mobilePayment.getReference();
-			if (null!= reference && reference.matches(PRODUCT_DESCRIPTION)) {
+			if (null != reference && reference.matches(PRODUCT_DESCRIPTION)) {
 				ilList.add(mobilePayment);
 			} else {
 				mobilePayment.setBank("Mobile Money");
@@ -55,20 +53,17 @@ public class MobileMoneyParserService extends PaymentParserService {
 
 		File file = writeToILFile(ilList, "IlListForMobilePayment", MobileMoney.class);
 		doCSVResponse(response, file);
-		workbenchList = workbenchMapper.mapToWorkbenchObject(workbenchMobileList, MobileMoney.class, MobileMoneyToWorkbench);
+		workbenchList = workbenchMapper.mapToWorkbenchObject(workbenchMobileList, MobileMoney.class,
+				MobileMoneyToWorkbench);
 		sendToWorkbench(workbenchList);
 	}
 
-	private File convert(MultipartFile file) throws IOException {
-		File convFile = new File(file.getOriginalFilename());
-		Boolean isFileNotCreated = convFile.createNewFile();
-		if (isFileNotCreated) {
-			logger.error("Unable to convert from mulitpart to file");
-			return null;
-		}
-		FileOutputStream fos = new FileOutputStream(convFile);
-		fos.write(file.getBytes());
-		fos.close();
-		return convFile;
-	}
+	/*
+	 * private File convert(MultipartFile file) throws IOException { File
+	 * convFile = new File(file.getOriginalFilename());
+	 * convFile.createNewFile(); if (!isFileCreated) {
+	 * logger.error("Unable to convert from mulitpart to file"); return null; }
+	 * FileOutputStream fos = new FileOutputStream(convFile);
+	 * fos.write(file.getBytes()); fos.close(); return convFile; }
+	 */
 }
