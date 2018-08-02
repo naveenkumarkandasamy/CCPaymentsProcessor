@@ -46,12 +46,12 @@ public class BarclaysPaymentParserService extends PaymentParserService {
 		List<Workbench> workbenchList = new ArrayList<>();
 		barclaysList.stream().forEach(barclayPayment -> {
 			String description = "";
+			barclayPayment.setBank("Barclays");
+			barclayPayment.setTransactionType("Cash/Cheque");
 			description = barclayPayment.getDescription();
 			if (null != description && description.matches(PRODUCT_DESCRIPTION)) {
 				ilList.add(barclayPayment);
 			} else {
-				barclayPayment.setBank("Barclays");
-				barclayPayment.setTransactionType("Cash/Cheque");
 				workbenchBarclayList.add(barclayPayment);
 			}
 		});

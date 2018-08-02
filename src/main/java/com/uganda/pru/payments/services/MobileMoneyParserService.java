@@ -41,12 +41,12 @@ public class MobileMoneyParserService extends PaymentParserService {
 		final List<MobileMoney> workbenchMobileList = new ArrayList<>();
 		List<Workbench> workbenchList = new ArrayList<>();
 		mobileMoneyList.stream().forEach(mobilePayment -> {
+			mobilePayment.setBank("Mobile Money");
+			mobilePayment.setTransactionType("Mobile Money");
 			String reference = mobilePayment.getReference();
 			if (null != reference && reference.matches(PRODUCT_DESCRIPTION)) {
 				ilList.add(mobilePayment);
 			} else {
-				mobilePayment.setBank("Mobile Money");
-				mobilePayment.setTransactionType("Mobile Money");
 				workbenchMobileList.add(mobilePayment);
 			}
 		});
@@ -57,13 +57,4 @@ public class MobileMoneyParserService extends PaymentParserService {
 				MobileMoneyToWorkbench);
 		sendToWorkbench(workbenchList);
 	}
-
-	/*
-	 * private File convert(MultipartFile file) throws IOException { File
-	 * convFile = new File(file.getOriginalFilename());
-	 * convFile.createNewFile(); if (!isFileCreated) {
-	 * logger.error("Unable to convert from mulitpart to file"); return null; }
-	 * FileOutputStream fos = new FileOutputStream(convFile);
-	 * fos.write(file.getBytes()); fos.close(); return convFile; }
-	 */
 }

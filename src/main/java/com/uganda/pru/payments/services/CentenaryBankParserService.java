@@ -45,11 +45,11 @@ public class CentenaryBankParserService extends PaymentParserService {
 		centenaryBankPaymentsList.stream().forEach(centenaryPayment -> {
 			String comments = "";
 			comments = centenaryPayment.getComments();
+			centenaryPayment.setBank("Centenary");
+			centenaryPayment.setTransactionType("Cash/Cheque");
 			if (null != comments && comments.matches(PRODUCT_DESCRIPTION)) {
 				ilList.add(centenaryPayment);
 			} else {
-				centenaryPayment.setBank("Centenary");
-				centenaryPayment.setTransactionType("Cash/Cheque");
 				workbenchCentenaryList.add(centenaryPayment);
 			}
 		});

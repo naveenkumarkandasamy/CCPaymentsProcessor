@@ -65,7 +65,8 @@ public class PaymentParserService {
 
 		// convert payment list to json array
 		JSONArray jsonPaymentArray = convertPaymentListToJsonArray(paymentList);
-
+		if (jsonPaymentArray == null)
+			return;
 		try {
 
 			// convert json array to workbench json format
