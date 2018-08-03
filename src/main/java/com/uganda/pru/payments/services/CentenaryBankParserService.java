@@ -43,15 +43,19 @@ public class CentenaryBankParserService extends PaymentParserService {
 		final List<CentenaryBank> workbenchCentenaryList = new ArrayList<>();
 		List<Workbench> workbenchList = new ArrayList<>();
 		centenaryBankPaymentsList.stream().forEach(centenaryPayment -> {
-			String comments = "";
-			comments = centenaryPayment.getComments();
-			centenaryPayment.setBank("Centenary");
-			centenaryPayment.setTransactionType("Cash/Cheque");
-			if (null != comments && comments.matches(PRODUCT_DESCRIPTION)) {
-				ilList.add(centenaryPayment);
-			} else {
-				workbenchCentenaryList.add(centenaryPayment);
+			if(centenaryPayment.getWd() != null && centenaryPayment.getWd().equalsIgnoreCase("Deposit")){
+				String comments = "";
+				comments = centenaryPayment.getComments();
+				centenaryPayment.setBank("Centenary");
+				centenaryPayment.setTransactionType("Cash/Cheque");
+
+				if (null != comments && comments.matches(PRODUCT_DESCRIPTION)) {
+					ilList.add(centenaryPayment);
+				} else {
+					workbenchCentenaryList.add(centenaryPayment);
+				}	
 			}
+
 		});
 		File file = writeToILFile(ilList, "IlListForCenetnaryBank", CentenaryBank.class);
 		doCSVResponse(response, file);
