@@ -16,7 +16,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,7 +36,10 @@ public class PaymentParserService {
 	HttpClientService httpClientService;
 	@Autowired
 	XLSXtoObjectConvertor xlsxToObjectConvertor;
-
+    
+	@Autowired
+	ThreadPoolTaskExecutor taskExecutor;		
+	
 	@Autowired
 	ObjectToCSVConvertor objectToCSVConvertor;
 
@@ -60,29 +65,26 @@ public class PaymentParserService {
 	}
 
 	public <T> void sendToWorkbench(List<T> paymentList) {
+
 		String workbenchData = null;
 		JSONObject paymentObject = null;
-
-		// convert payment list to json array
-		JSONArray jsonPaymentArray = convertPaymentListToJsonArray(paymentList);
-		if (jsonPaymentArray == null)
+		if (paymentList == null)
 			return;
 		try {
-
+			JSONArray paymentArray = convertPaymentListToJsonArray(paymentList);
 			// convert json array to workbench json format
-			for (int i = 0; i < jsonPaymentArray.length(); i++) {
-
-				paymentObject = jsonPaymentArray.getJSONObject(i);
+			for (int i = 0; i < paymentArray.length(); i++) {
+				paymentObject = paymentArray.getJSONObject(i);
 				workbenchData = convertJsonObjToWorkbenchObj(paymentObject);
-
-				logger.debug("Workbench Data " + workbenchData);
-				System.out.println(workbenchData);
-
-				// send to workbench
-				httpClientService.sendJsonToWorkbench(workbenchData);
+				
+				WorkBenchClientRunnable workBenchClientRunnable = new WorkBenchClientRunnable();
+				workBenchClientRunnable.setWorkBenchData(workbenchData);
+				workBenchClientRunnable.setHttpClient(httpClientService);
+				taskExecutor.execute(workBenchClientRunnable);
 			}
-		} catch (JSONException e) {
-			logger.error("Error parsing the list data to workbench json format data " + e.getMessage());
+		}
+		catch(Exception ex){
+			logger.error(ex);
 		}
 
 	}
