@@ -14,8 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.uganda.pru.payments.mapper.Mapper;
+import com.uganda.pru.payments.model.Barclays;
 import com.uganda.pru.payments.model.CentenaryBank;
-import com.uganda.pru.payments.model.Workbench;
+import com.uganda.pru.payments.model.ILSoapModel;
 
 @Component
 public class CentenaryBankParserService extends PaymentParserService {
@@ -41,7 +42,7 @@ public class CentenaryBankParserService extends PaymentParserService {
 			List<CentenaryBank> centenaryBankPaymentsList) {
 		final List<CentenaryBank> ilList = new ArrayList<>();
 		final List<CentenaryBank> workbenchCentenaryList = new ArrayList<>();
-		List<Workbench> workbenchList = new ArrayList<>();
+		List<ILSoapModel> ilSoapModelList = new ArrayList<>();
 		centenaryBankPaymentsList.stream().forEach(centenaryPayment -> {
 			if(centenaryPayment.getWd() != null && centenaryPayment.getWd().equalsIgnoreCase("Deposit")){
 				String comments = "";
@@ -57,10 +58,15 @@ public class CentenaryBankParserService extends PaymentParserService {
 			}
 
 		});
-		File file = writeToILFile(ilList, "IlListForCenetnaryBank", CentenaryBank.class);
+		File file = writeToILFile(workbenchCentenaryList, "IlListForCenetnaryBank", CentenaryBank.class);
 		doCSVResponse(response, file);
-		workbenchList = workbenchMapper.mapToWorkbenchObject(workbenchCentenaryList, CentenaryBank.class,
-				CentenaryToWorkbench);
-		sendToWorkbench(workbenchList);
+		ilSoapModelList = workbenchMapper.mapToWorkbenchObject(ilList, CentenaryBank.class, CentenaryToWorkbench);
+		System.out.println(ilSoapModelList);
+		if(ilSoapModelList!=null)
+		{
+			for (ILSoapModel ilSoapModel : ilSoapModelList) {
+				new SoapRequestService().sendSoapRequest(ilSoapModel);;
+			}
+		}
 	}
 }

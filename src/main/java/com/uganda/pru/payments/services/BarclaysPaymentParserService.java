@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.uganda.pru.payments.converter.XLSXtoObjectConvertor;
 import com.uganda.pru.payments.mapper.Mapper;
 import com.uganda.pru.payments.model.Barclays;
-import com.uganda.pru.payments.model.Workbench;
+import com.uganda.pru.payments.model.ILSoapModel;
 
 @Component
 public class BarclaysPaymentParserService extends PaymentParserService {
@@ -42,8 +42,8 @@ public class BarclaysPaymentParserService extends PaymentParserService {
 
 	public void splitBarclaysPaymentList(HttpServletResponse response, List<Barclays> barclaysList) {
 		final List<Barclays> ilList = new ArrayList<>();
-		final List<Barclays> workbenchBarclayList = new ArrayList<>();
-		List<Workbench> workbenchList = new ArrayList<>();
+		final List<Barclays> ilBarclayList = new ArrayList<>();
+		List<ILSoapModel> ilSoapModelList = new ArrayList<>();
 		barclaysList.stream().forEach(barclayPayment -> {
 			String description = "";
 			barclayPayment.setBank("Barclays");
@@ -52,13 +52,20 @@ public class BarclaysPaymentParserService extends PaymentParserService {
 			if (null != description && description.matches(PRODUCT_DESCRIPTION)) {
 				ilList.add(barclayPayment);
 			} else {
-				workbenchBarclayList.add(barclayPayment);
+				ilBarclayList.add(barclayPayment);
 			}
 		});
-		File file = writeToILFile(ilList, "IlListForBarclaysPayment", Barclays.class);
+		File file = writeToILFile(ilBarclayList, "IlListForBarclaysPayment", Barclays.class);
 		doCSVResponse(response, file);
-		workbenchList = workbenchMapper.mapToWorkbenchObject(workbenchBarclayList, Barclays.class, BarclaysToWorkbench);
-		sendToWorkbench(workbenchList);
+		ilSoapModelList = workbenchMapper.mapToWorkbenchObject(ilList, Barclays.class, BarclaysToWorkbench);
+		System.out.println(ilSoapModelList);
+		if(ilSoapModelList!=null)
+		{
+			for (ILSoapModel ilSoapModel : ilSoapModelList) {
+				new SoapRequestService().sendSoapRequest(ilSoapModel);;
+			}
+		}
+		
 	}
 
 }

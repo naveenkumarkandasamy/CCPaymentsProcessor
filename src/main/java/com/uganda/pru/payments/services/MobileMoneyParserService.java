@@ -14,8 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.uganda.pru.payments.mapper.Mapper;
+import com.uganda.pru.payments.model.CentenaryBank;
 import com.uganda.pru.payments.model.MobileMoney;
-import com.uganda.pru.payments.model.Workbench;
+import com.uganda.pru.payments.model.ILSoapModel;
 
 @Component
 public class MobileMoneyParserService extends PaymentParserService {
@@ -39,7 +40,7 @@ public class MobileMoneyParserService extends PaymentParserService {
 	public void splitMobileMoneyList(HttpServletResponse response, List<MobileMoney> mobileMoneyList) {
 		final List<MobileMoney> ilList = new ArrayList<>();
 		final List<MobileMoney> workbenchMobileList = new ArrayList<>();
-		List<Workbench> workbenchList = new ArrayList<>();
+		List<ILSoapModel> ilSoapModelList = new ArrayList<>();
 		mobileMoneyList.stream().forEach(mobilePayment -> {
 			mobilePayment.setBank("Mobile Money");
 			mobilePayment.setTransactionType("Mobile Money");
@@ -51,10 +52,15 @@ public class MobileMoneyParserService extends PaymentParserService {
 			}
 		});
 
-		File file = writeToILFile(ilList, "IlListForMobilePayment", MobileMoney.class);
+		File file = writeToILFile(workbenchMobileList, "IlListForMobilePayment", MobileMoney.class);
 		doCSVResponse(response, file);
-		workbenchList = workbenchMapper.mapToWorkbenchObject(workbenchMobileList, MobileMoney.class,
-				MobileMoneyToWorkbench);
-		sendToWorkbench(workbenchList);
+		ilSoapModelList = workbenchMapper.mapToWorkbenchObject(ilList, MobileMoney.class, MobileMoneyToWorkbench);
+		System.out.println(ilSoapModelList);
+		if(ilSoapModelList!=null)
+		{
+			for (ILSoapModel workbench : ilSoapModelList) {
+				new SoapRequestService().sendSoapRequest(workbench);;
+			}
+		}
 	}
 }

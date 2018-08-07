@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.uganda.pru.payments.model.Workbench;
+import com.uganda.pru.payments.model.ILSoapModel;
 
 
 @Component
@@ -23,15 +23,15 @@ public class Mapper {
 
 	static final Logger logger = Logger.getLogger(Mapper.class);
 
-	public <T> List<Workbench> mapToWorkbenchObject(List<T> recordsList, Class<T> classType, Map<String, String> recordToWorkbenchMap) {
-		List<Workbench> workbenchList = null;
+	public <T> List<ILSoapModel> mapToWorkbenchObject(List<T> recordsList, Class<T> classType, Map<String, String> recordToWorkbenchMap) {
+		List<ILSoapModel> workbenchList = null;
 		if (null != recordsList && !recordsList.isEmpty()) {
 
 			workbenchList = new ArrayList<>();
 
 			for (T record : recordsList) {
 				if (null != record) {
-					Workbench workbenchRecord = (Workbench)converter.map(record, classType, Workbench.class, recordToWorkbenchMap);	
+					ILSoapModel workbenchRecord = (ILSoapModel)converter.map(record, classType, ILSoapModel.class, recordToWorkbenchMap);	
 					workbenchList.add(workbenchRecord);
 				} else {
 					logger.debug("Record list is null");

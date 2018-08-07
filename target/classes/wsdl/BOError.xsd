@@ -1,0 +1,79 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.csc.smart/bo/schemas/Error" targetNamespace="http://www.csc.smart/bo/schemas/Error">
+ <!--
+ 
+		***************************************************************************************************************
+		Copyright 2010 - 2018, Computer Sciences Corporation (a DXC technology group company). All rights reserved.
+	
+		Use of this product is subject to your license agreement. Warning: This computer program is protected by 
+		copyright law and international treaties. Unauthorized reproduction or distribution of this program, or any 
+		portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent
+		possible under the law.
+		
+		***************************************************************************************************************
+		***************************************************************************************************************
+		
+		BO Error Schema 
+		===============
+		
+		This is a schema representing a Business Object Error response XML structure produced from MSP.
+		
+		***************************************************************************************************************
+		*
+		*  Amendment History
+		*  ==================
+		*
+		*  Date         Vsn/Mod   Work Unit    By
+		*
+		*  01/11/2011   01/01     D12BST       Steve Hale
+		*               Initial version. 
+		*
+		*  05/02/2018   01/01     D18RST       Steve Hale
+		*               Allow an optional overall HTTP Status to be set.
+		*
+		***************************************************************************************************************
+		
+	
+-->
+<xsd:element name="ENTITY_ID" type="xsd:string"/>
+<xsd:element name="ERROR_OCCUR" type="xsd:string"/>
+<xsd:element name="REASON">
+<xsd:complexType>
+<xsd:sequence>
+<xsd:element maxOccurs="1" minOccurs="1" ref="ERROR_DESC"/>
+<xsd:element maxOccurs="1" minOccurs="0" ref="ERROR_EROR"/>
+<xsd:element maxOccurs="25" minOccurs="0" ref="FIELD"/>
+</xsd:sequence>
+</xsd:complexType>
+</xsd:element>
+<xsd:element name="STATUS" type="xsd:string"/>
+<xsd:element name="OBJECT_ID" type="xsd:string"/>
+<xsd:element name="VERB_ID" type="xsd:string"/>
+<xsd:element name="PROGRAM" type="xsd:string"/>
+<xsd:element name="ERROR">
+<xsd:complexType>
+<xsd:sequence>
+<xsd:element maxOccurs="1" minOccurs="1" ref="STATUS"/>
+<xsd:element maxOccurs="1" minOccurs="0" ref="OBJECT_ID"/>
+<xsd:element maxOccurs="1" minOccurs="0" ref="VERB_ID"/>
+<xsd:element maxOccurs="1" minOccurs="0" ref="PROGRAM"/>
+<xsd:element maxOccurs="1" minOccurs="0" ref="ENTITY"/>
+<xsd:element maxOccurs="1" minOccurs="0" ref="ENTITY_ID"/>
+<xsd:element maxOccurs="1" minOccurs="0" ref="HTTP_STATUS"/>
+<xsd:element maxOccurs="25" minOccurs="1" ref="REASON"/>
+</xsd:sequence>
+</xsd:complexType>
+</xsd:element>
+<xsd:element name="ENTITY" type="xsd:string"/>
+<xsd:element name="ERROR_FIELD" type="xsd:string"/>
+<xsd:element name="ERROR_DESC" type="xsd:string"/>
+<xsd:element name="FIELD">
+<xsd:complexType>
+<xsd:sequence>
+<xsd:element maxOccurs="1" minOccurs="1" ref="ERROR_FIELD"/>
+<xsd:element maxOccurs="1" minOccurs="0" ref="ERROR_OCCUR"/>
+</xsd:sequence>
+</xsd:complexType>
+</xsd:element>
+<xsd:element name="ERROR_EROR" type="xsd:string"/>
+<xsd:element name="HTTP_STATUS" type="xsd:string"/>
+</xsd:schema>

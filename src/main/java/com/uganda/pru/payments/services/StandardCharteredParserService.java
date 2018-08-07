@@ -14,8 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.uganda.pru.payments.mapper.Mapper;
+import com.uganda.pru.payments.model.MobileMoney;
 import com.uganda.pru.payments.model.StandardChartered;
-import com.uganda.pru.payments.model.Workbench;
+import com.uganda.pru.payments.model.ILSoapModel;
 
 @Component
 public class StandardCharteredParserService extends PaymentParserService {
@@ -41,7 +42,7 @@ public class StandardCharteredParserService extends PaymentParserService {
 			List<StandardChartered> standardCharteredList) {
 		final List<StandardChartered> ilList = new ArrayList<>();
 		final List<StandardChartered> workbenchStandardChartered = new ArrayList<>();
-		List<Workbench> workbenchList = new ArrayList<>();
+		List<ILSoapModel> ilSoapModelList = new ArrayList<>();
 
 		// Removing header and footer
 		standardCharteredList.remove(standardCharteredList.size() - 1);
@@ -57,10 +58,16 @@ public class StandardCharteredParserService extends PaymentParserService {
 			}
 		});
 
-		File file = writeToILFile(ilList, "IlListForStandardChartered", StandardChartered.class);
+		File file = writeToILFile(workbenchStandardChartered, "IlListForStandardChartered", StandardChartered.class);
 		doCSVResponse(response, file);
-		workbenchList = workbenchMapper.mapToWorkbenchObject(workbenchStandardChartered, StandardChartered.class,
-				StandardCharteredToWorkbench);
-		sendToWorkbench(workbenchList);
+		ilSoapModelList = workbenchMapper.mapToWorkbenchObject(ilList, StandardChartered.class, StandardCharteredToWorkbench);
+		System.out.println(ilSoapModelList);
+		if(ilSoapModelList!=null)
+		{
+			for (ILSoapModel ilSoapModel : ilSoapModelList) {
+				new SoapRequestService().sendSoapRequest(ilSoapModel);;
+			}
+		}
+		
 	}
 }
