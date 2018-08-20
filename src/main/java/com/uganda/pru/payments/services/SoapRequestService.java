@@ -9,11 +9,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.Properties;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -30,26 +26,57 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Service;
+
 import com.sun.xml.messaging.saaj.soap.impl.ElementImpl;
+import com.uganda.pru.payments.model.ILInputModel;
 import com.uganda.pru.payments.model.MSPContext;
 import com.uganda.pru.payments.model.RCTCRTIREC;
-import com.uganda.pru.payments.model.RequestParameter;
-import com.uganda.pru.payments.model.RequestParameters;
-import com.uganda.pru.payments.model.ILSoapModel;
 import com.uganda.pru.payments.model.RCTCRTIREC.ADDITIONALFIELDS;
 import com.uganda.pru.payments.model.RCTCRTIREC.S2610SFL;
 import com.uganda.pru.payments.model.RCTCRTIREC.SFL;
-import com.uganda.pru.payments.model.RCTCRTIREC.TRANDATEX;
 import com.uganda.pru.payments.model.RCTCRTIREC.SFL.TCHQDATE;
-
+import com.uganda.pru.payments.model.RCTCRTIREC.TRANDATEX;
+import com.uganda.pru.payments.model.RequestParameter;
+import com.uganda.pru.payments.model.RequestParameters;
+@Service
+@PropertySource("classpath:soap-connection.properties")
 public class SoapRequestService {
 
+	@Value("${UserId}")
+	private String userId;
+	@Value("${UserPassword}")
+	private String userPassword;
+	@Value("${Name}")
+	private String name;
+	@Value("${Value}")
+	private String value;
+	@Value("${ACTION}")
+	private String action;
+	@Value("${BANKCODE}")
+	private String bankCode;
+	@Value("${RFCODE}")
+	private String rfCode;
+	@Value("${ORIGCURR}")
+	private String origcurr;
+	@Value("${PAYTYPE}")
+	private String paytype;
+	@Value("${SCRATE}")
+	private String scrate;
+	@Value("${SACSCODE}")
+	private String sacscode;
+	@Value("${SACSTYPW}")
+	private String sacstypw;
+	@Value("${DISSEC}")
+	private String dissec;
+	@Value("${ReceiptURL}")
+	private String receiptURL;
 	
+	@SuppressWarnings("rawtypes")
+	public String sendSoapRequest(ILInputModel requestInput,String customerNumber){
 
-	public void sendSoapRequest(ILSoapModel requestInput){
-
-		Properties prop = new Properties();
-		InputStream input = null;
 		RCTCRTIREC rec = new RCTCRTIREC();
 		TRANDATEX trandatex = new TRANDATEX();
 		SFL sfl = new SFL();
@@ -59,54 +86,26 @@ public class SoapRequestService {
 		RequestParameters requestParameters = new RequestParameters();
 		RequestParameter requestParameter = new RequestParameter();
 		S2610SFL s2610sfl = new S2610SFL();
-		try {
-			
-			
-			input =getClass().getResourceAsStream("/application.properties");
-			prop.load(input);
+		try {			
+			mspcontext.setUserId(userId);
+			mspcontext.setUserPassword(userPassword);
 
-			String policyNumber = requestInput.getProductDescription().split("/").length>1?requestInput.getProductDescription().split("/")[2]:requestInput.getProductDescription().substring(6, requestInput.getProductDescription().length()-4);
-			String date[]=new String[3];
-			if(requestInput.getTransactionDate().split("/").length>1)
-			{
-				date= requestInput.getTransactionDate().split("/");
-			}
-			else
-			{
-				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-				Date dateFormatted = null;
-				try {
-					dateFormatted = simpleDateFormat.parse(requestInput.getTransactionDate());
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				date[0]=String.valueOf(dateFormatted.getDate());
-				date[1]=String.valueOf(dateFormatted.getMonth());
-				date[2]=String.valueOf(dateFormatted.getYear()+1900);
-			}
-			
-			//String date[] = requestInput.getTransactionDate().split("/").length>1?;
-
-			mspcontext.setUserId(prop.getProperty("UserId"));
-			mspcontext.setUserPassword(prop.getProperty("UserPassword"));
-
-			requestParameter.setName(prop.getProperty("Name"));
-			requestParameter.setValue(prop.getProperty("Value"));
+			requestParameter.setName(name);
+			requestParameter.setValue(value);
 			requestParameters.getRequestParameter().add(requestParameter);
 
 			mspcontext.setRequestParameters(requestParameters);
 
 			rec.setMSPContext(mspcontext);
 
-			rec.setACTION(prop.getProperty("ACTION"));
-			rec.setBANKCODE(prop.getProperty("BANKCODE"));
-			rec.setRFCODE(prop.getProperty("RFCODE"));
-			rec.setRFNUM(prop.getProperty("RFNUM"));
+			rec.setACTION(action);
+			rec.setBANKCODE(bankCode);
+			rec.setRFCODE(rfCode);
+			rec.setRFNUM(customerNumber);
 
-			trandatex.setCCYY(new BigInteger((String) date[2].subSequence(0, 4)));
-			trandatex.setMM(new BigInteger(date[1]));
-			trandatex.setDD(new BigInteger(date[0]));
+			trandatex.setCCYY(new BigInteger(requestInput.getYear()));
+			trandatex.setMM(new BigInteger(requestInput.getMonth()));
+			trandatex.setDD(new BigInteger(requestInput.getDate()));
 
 			rec.setTRANDATEX(trandatex);
 
@@ -115,23 +114,12 @@ public class SoapRequestService {
 			sfl.setBANKDESC03("");
 			sfl.setBANKKEY("");
 			sfl.setCHEQNO("");
-			if(!requestInput.getCreditAmount().contains("."))
-			{
-				sfl.setDOCORIGAMT(new BigDecimal(requestInput.getCreditAmount().replaceAll(",","")));
-				s2610sfl.setACCTAMT(new BigDecimal(requestInput.getCreditAmount().replaceAll(",","")));
-				s2610sfl.setORIGAMT(new BigDecimal(requestInput.getCreditAmount().replaceAll(",","")));
-
-			}
-			else
-			{
-				sfl.setDOCORIGAMT(new BigDecimal(requestInput.getCreditAmount().replaceAll(",","").substring(0, requestInput.getCreditAmount().indexOf(".")-1)));
-				s2610sfl.setACCTAMT(new BigDecimal(requestInput.getCreditAmount().replaceAll(",","").substring(0, requestInput.getCreditAmount().indexOf(".")-1)));
-				s2610sfl.setORIGAMT(new BigDecimal(requestInput.getCreditAmount().replaceAll(",","").substring(0, requestInput.getCreditAmount().indexOf(".")-1)));
-
-			}
-			sfl.setORIGCURR(prop.getProperty("ORIGCURR"));
-			sfl.setPAYTYPE(prop.getProperty("PAYTYPE"));
-			sfl.setSCRATE(new BigDecimal(prop.getProperty("SCRATE")));
+			sfl.setDOCORIGAMT(new BigDecimal(requestInput.getCreditAmount()));
+			s2610sfl.setACCTAMT(new BigDecimal(requestInput.getCreditAmount()));
+			s2610sfl.setORIGAMT(new BigDecimal(requestInput.getCreditAmount()));
+			sfl.setORIGCURR(origcurr);
+			sfl.setPAYTYPE(paytype);
+			sfl.setSCRATE(new BigDecimal(scrate));
 			sfl.setZCHQTYP("");
 
 			tchqdate.setCCYY(new BigInteger("9999"));
@@ -142,16 +130,16 @@ public class SoapRequestService {
 
 			rec.setSFL(sfl);
 			
-			s2610sfl.setENTITY(policyNumber);
-			s2610sfl.setSACSCODE(prop.getProperty("SACSCODE"));
-			s2610sfl.setSACSTYPW(prop.getProperty("SACSTYPW"));
+			s2610sfl.setENTITY(requestInput.getPolicyNumber());
+			s2610sfl.setSACSCODE(sacscode);
+			s2610sfl.setSACSTYPW(sacstypw);
 
 			rec.getS2610SFL().add(s2610sfl);
 
 			additionalFields.setTRANCDE("");
 			additionalFields.setTRANCDE("");
 			additionalFields.setPRTIND("");
-			additionalFields.setDISSEC(new BigInteger(prop.getProperty("DISSEC")));
+			additionalFields.setDISSEC(new BigInteger(dissec));
 			additionalFields.setREMFLD1("");
 			additionalFields.setREMFLD2("");
 
@@ -164,26 +152,35 @@ public class SoapRequestService {
 				InputStream is = new ByteArrayInputStream(result.getBytes());
 				SOAPMessage request = MessageFactory.newInstance().createMessage(null, is);
 				request.writeTo(System.out);
-				System.out.println();
-				URL endpoint = new URL("http://10.163.177.100:9081/LIFEWebSrv/RCTService");
+				//System.out.println();
+				URL endpoint = new URL(receiptURL);
 				SOAPMessage response = connection.call(request, endpoint);
 				System.out.println(response);
+				response.writeTo(System.out);
+				System.out.println();
+				Iterator updates = response.getSOAPBody().getChildElements();
+	            while (updates.hasNext()) {
+	                System.out.println();
+	                // The listing and its ID
+	                SOAPElement e = (SOAPElement)updates.next();
+	                QName dateTimeStamp=new QName("RECEIPT");
+            		Iterator it = e.getChildElements(dateTimeStamp);
+                    while(it.hasNext())
+                    {
+                    	ElementImpl receiptNumber = (ElementImpl)it.next();
+                    	System.out.println(receiptNumber.getValue());
+                    	return receiptNumber.getValue();
+                    }
+	            }
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		} 
+		return null;
 
 	}
 

@@ -11,73 +11,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.uganda.pru.payments.services.BarclaysPaymentParserService;
-import com.uganda.pru.payments.services.CentenaryBankParserService;
-import com.uganda.pru.payments.services.MobileMoneyParserService;
-import com.uganda.pru.payments.services.StandardCharteredParserService;
+
+import com.uganda.pru.payments.services.PaymentParserService;
 
 @RestController
 @RequestMapping("/api/converter")
 public class PaymentsRestContoller {
 
 	@Autowired
-	BarclaysPaymentParserService barclaysPaymentParserService;
-	@Autowired
-	MobileMoneyParserService mobileMoneyParserService;
-	@Autowired
-	CentenaryBankParserService centenaryBankParserService;
-	@Autowired
-	StandardCharteredParserService standardCharteredParserService;
+	PaymentParserService paymentParserService;
 	/*@Autowired 
 	PaymentParserService1 paymentParserService;
 	 */
 	static final Logger logger = Logger.getLogger(PaymentsRestContoller.class);
 
-	@RequestMapping(value = "/barclays", method = RequestMethod.POST)
+	@RequestMapping(value = "/payments", method = RequestMethod.POST)
 	@ResponseBody
 	public void generateILFileForCashPayments(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(value = "file") final MultipartFile pasFile) {
 		try {
-			barclaysPaymentParserService.parseExcelForBarclaysPayments(response, pasFile);
+			paymentParserService.parseExcelForBarclaysPayments(response, pasFile);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Error while parsing bank payments file for cash payments " + e);
 		}
 	}
 
-	@RequestMapping(value = "/mobileMoney", method = RequestMethod.POST)
-	@ResponseBody
-	public void generateILFileForMobileMoney(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(value = "file") final MultipartFile pasFile) {
-		try {
-			mobileMoneyParserService.parseExcelForMobileMoney(response, pasFile);
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Error while parsing payments file for mobile money " + e);
-		}
-	}
-
-	@RequestMapping(value = "/centenaryUGX", method = RequestMethod.POST)
-	@ResponseBody
-	public void generateILFileForCentenaryBank(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(value = "file") final MultipartFile pasFile) {
-		try {
-			centenaryBankParserService.parseExcelForCentenaryBank(response, pasFile);
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Error while parsing bank payments file for Centenary Bank " + e);
-		}
-	}
-
-	@RequestMapping(value = "/standardChartered", method = RequestMethod.POST)
-	@ResponseBody
-	public void generateILFileForStandardChartered(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(value = "file") final MultipartFile pasFile) {
-		try {
-			standardCharteredParserService.parseExcelForStandardChartered(response, pasFile);
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Error while parsing bank payments file for Centenary Bank " + e);
-		}
-	}
 }
